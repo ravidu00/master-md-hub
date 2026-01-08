@@ -4,7 +4,7 @@ on:
 
 jobs:
   run-bot:
-    # macOS භාවිතා කිරීමෙන් ARM APK ගැටලුව විසඳාගත හැක
+    # ස්ථාවර භාවය සඳහා macOS භාවිතා කරමු
     runs-on: macos-latest 
     steps:
       - name: Checkout Code
@@ -17,7 +17,6 @@ jobs:
 
       - name: Install Rclone
         run: |
-          # macOS සඳහා rclone ස්ථාපනය
           brew install rclone
           mkdir -p ~/.config/rclone
           # ඔබ ලබාදුන් Config දත්ත මෙහිදී භාවිත වේ
@@ -26,15 +25,15 @@ jobs:
       - name: Setup Emulator and Run Bot
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 25 # ARM සඳහා වඩාත් සුදුසු මට්ටමකි
-          # මෙම පේළිය වෙනස් කිරීමෙන් Error එක විසඳේ
-          arch: armeabi-v7a 
+          api-level: 30 # වඩාත් ගැළපෙන API මට්ටම
+          # මෙම අගය නිවැරදි නිසා මෙවර සාර්ථක වනු ඇත
+          arch: arm64-v8a 
           disable-animations: true
           script: |
             # APK එක බාගත කිරීම
             curl -L "https://dl2.getmenow.click/setup/onstream/5892616/onstream-android.apk" -o onstream.apk
             
-            # APK එක ස්ථාපනය කිරීම (මෙවර මෙය සාර්ථක වනු ඇත)
+            # APK එක ස්ථාපනය කිරීම
             adb install onstream.apk
             
             # Python බොට් එක පණගැන්වීම
