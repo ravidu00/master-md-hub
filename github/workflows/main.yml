@@ -1,0 +1,32 @@
+name: OnStream to GDrive Bot
+on:
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Rclone
+        run: |
+          sudo apt-get install rclone -y
+          mkdir -p ~/.config/rclone
+          echo "${{ secrets.RCLONE_CONFIG_DATA }}" > ~/.config/rclone/rclone.conf
+
+      - name: Setup Emulator and Run Bot
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: |
+            # APK එක ඩවුන්ලෝඩ් කර ඉන්ස්ටෝල් කිරීම
+            curl -L "https://dl2.getmenow.click/setup/onstream/5892616/onstream-android.apk" -o onstream.apk
+            adb install onstream.apk
+            
+            # Python script එක ක්‍රියාත්මක කිරීම
+            python3 bot_script.py
+        env:
+          RCLONE_CONFIG_DATA: ${{ secrets.RCLONE_CONFIG_DATA }}
+          TG_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
