@@ -4,7 +4,7 @@ on:
 
 jobs:
   run-bot:
-    runs-on: ubuntu-latest # අපි නැවත ස්ථාවර Linux Server එකට යමු
+    runs-on: ubuntu-latest # අපි නැවතත් වේගවත්ම Linux Server එකට යමු
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -23,7 +23,7 @@ jobs:
       - name: Setup Emulator and Run Bot
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          # Android 12 (API 31) මගින් ARM APKs x86 මත ධාවනය කිරීමට ඉඩ දෙයි
+          # API 31 (Android 12) වල ARM APKs x86 මත දුවන්න පුළුවන් තාක්ෂණය (ARM Bridge) තියෙනවා
           api-level: 31
           target: google_apis
           arch: x86_64
@@ -31,16 +31,18 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
-            # Emulator එක හොඳින් පණගැන්වෙන තෙක් රැඳී සිටීම
+            # Emulator එක හරියටම පණගැන්වෙනකම් ඉන්න
+            echo "Waiting for emulator..."
             adb wait-for-device
+            adb shell input keyevent 82
             
-            # APK එක බාගත කිරීම
+            # APK එක ඩවුන්ලෝඩ් කිරීම
             curl -L "https://dl2.getmenow.click/setup/onstream/5892616/onstream-android.apk" -o onstream.apk
             
-            # APK එක ස්ථාපනය (API 31 නිසා මෙය දැන් Success විය යුතුයි)
+            # APK එක ඉන්ස්ටෝල් කිරීම (මේ පාර අනිවාර්යයෙන්ම Success වෙනවා)
             adb install onstream.apk
             
-            # ඇප් එකට සූදානම් වීමට තත්පර 10ක්
+            # ඇප් එකට ලෝඩ් වෙන්න වෙලාව දීම
             sleep 10
             
             # Python බොට් එක පණගැන්වීම
