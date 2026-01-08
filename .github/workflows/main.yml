@@ -4,7 +4,7 @@ on:
 
 jobs:
   run-bot:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest # අපි නැවත ස්ථාවර Linux Server එකට යමු
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -16,32 +16,34 @@ jobs:
 
       - name: Install Rclone
         run: |
-          brew install rclone
+          sudo apt-get install rclone -y
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONFIG_DATA }}" > ~/.config/rclone/rclone.conf
 
       - name: Setup Emulator and Run Bot
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
-          arch: arm64-v8a # ඔබ කලින් ලබාගත් පින්තූරයට අනුව නිවැරදි අගය
+          # Android 12 (API 31) මගින් ARM APKs x86 මත ධාවනය කිරීමට ඉඩ දෙයි
+          api-level: 31
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          force-avd-creation: true
           script: |
-            # 1. Emulator එක පණගැන්වෙන තෙක් උපරිමයෙන් රැඳී සිටීම
-            echo "Waiting for emulator to be ready..."
+            # Emulator එක හොඳින් පණගැන්වෙන තෙක් රැඳී සිටීම
             adb wait-for-device
             
-            # පද්ධතිය ස්ථාවර වීමට අමතර තත්පර 30ක් ලබා දීම
-            sleep 30
-            
-            # 2. APK එක බාගත කිරීම
+            # APK එක බාගත කිරීම
             curl -L "https://dl2.getmenow.click/setup/onstream/5892616/onstream-android.apk" -o onstream.apk
             
-            # 3. APK එක ස්ථාපනය කිරීම
+            # APK එක ස්ථාපනය (API 31 නිසා මෙය දැන් Success විය යුතුයි)
             adb install onstream.apk
             
-            # 4. Python බොට් එක පණගැන්වීම
+            # ඇප් එකට සූදානම් වීමට තත්පර 10ක්
+            sleep 10
+            
+            # Python බොට් එක පණගැන්වීම
             python3 bot_script.py
         env:
           RCLONE_CONFIG_DATA: ${{ secrets.RCLONE_CONFIG_DATA }}
