@@ -4,7 +4,7 @@ on:
 
 jobs:
   run-bot:
-    # ස්ථාවර භාවය සඳහා macOS භාවිතා කරමු
+    # macOS භාවිතා කිරීමෙන් ARM64 APK එක සාර්ථකව පණගැන්විය හැක
     runs-on: macos-latest 
     steps:
       - name: Checkout Code
@@ -17,6 +17,7 @@ jobs:
 
       - name: Install Rclone
         run: |
+          # macOS සඳහා rclone ස්ථාපනය
           brew install rclone
           mkdir -p ~/.config/rclone
           # ඔබ ලබාදුන් Config දත්ත මෙහිදී භාවිත වේ
@@ -25,16 +26,23 @@ jobs:
       - name: Setup Emulator and Run Bot
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30 # වඩාත් ගැළපෙන API මට්ටම
-          # මෙම අගය නිවැරදි නිසා මෙවර සාර්ථක වනු ඇත
+          api-level: 30
+          # GitHub පෙන්වූ පරිදි නිවැරදි Architecture එක මෙයයි
           arch: arm64-v8a 
           disable-animations: true
+          force-avd-creation: true
           script: |
+            # Emulator එක සූදානම් වන තෙක් රැඳී සිටීම
+            adb wait-for-device
+            
             # APK එක බාගත කිරීම
             curl -L "https://dl2.getmenow.click/setup/onstream/5892616/onstream-android.apk" -o onstream.apk
             
             # APK එක ස්ථාපනය කිරීම
             adb install onstream.apk
+            
+            # පද්ධතිය ස්ථාවර වීමට තත්පර 10ක් ලබා දීම
+            sleep 10
             
             # Python බොට් එක පණගැන්වීම
             python3 bot_script.py
